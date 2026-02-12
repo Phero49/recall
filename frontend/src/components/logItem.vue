@@ -3,11 +3,18 @@
         <q-card flat class="glass-card smart-border modern-shadow">
             <q-card-section class="q-pb-none">
                 <div class="row justify-between items-start no-wrap">
-                    <div ref="detailsRef" class="text-body1 text-grey-2" :contenteditable="editDetails"
-                        :class="{ 'editing-mode': editDetails, 'text-strike text-grey-6': logItemData?.status === 'completed' }"
-                        style="outline: none; min-height: 24px; width: 100%; border-radius: 4px; padding: 4px;">
-                        {{ logItemData?.details }}
+                    <div class="col-grow">
+                        <q-editor content-class="text-subtitle1" style="border-radius: 10px;" :readonly="!editDetails"
+                            :toolbar="!editDetails ? [] : bodyToolbar" v-if="logItemData?.details"
+                            v-model="logItemData.details" min-height="3rem" flat />
+
+                        <!-- <div ref="detailsRef" class="text-body1 text-grey-2" :contenteditable="editDetails"
+                            :class="{ 'editing-mode': editDetails, 'text-strike text-grey-6': logItemData?.status === 'completed' }"
+                            style="outline: none; min-height: 24px; width: 100%; border-radius: 4px; padding: 4px;">
+                            {{ logItemData?.details }}
+                        </div> -->
                     </div>
+
                     <q-btn dense round color="primary" :icon="editDetails ? 'check' : 'edit_note'" size="sm" flat
                         class="q-ml-sm" @click="toggleEdit" />
                 </div>
@@ -70,7 +77,7 @@ const appStore = useAppStore();
 const editDetails = ref(false);
 const addInsights = ref(false)
 const template = `<div class="insight-prompt"  font-size: 0.95em; line-height: 1.5; margin-top: 1.2em; padding-left: 0.3em;">
-  <p style="margin: 0 0 0.6em; font-weight: 500; color: #555;">Add insights (optional but valuable):</p>
+  <p style="margin: 0 0 0.6em; font-weight: 500;">Add insights (optional but valuable):</p>
   <ul style="margin: 0; padding-left: 1.2em; list-style-type: '• ';">
     <li>What surprised me today?</li>
     <li>What kept me stuck—or set me free?</li>
@@ -97,6 +104,7 @@ async function updateStatus(newStatus: string) {
     if (!props.logItemData) return;
     updatedItem.value = { ...props.logItemData, status: newStatus };
     addInsights.value = true;
+    emit('updateItem', updatedItem.value)
 
 } const $q = useQuasar()
 const toolbar = [
@@ -135,6 +143,14 @@ const toolbar = [
 
     ['undo', 'redo'],
 ]
+
+const bodyToolbar = [
+    ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
+    ['hr'],
+    ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
+
+    ['undo', 'redo'],
+]
 function save() {
 
     if (updatedItem.value == undefined) {
@@ -147,7 +163,7 @@ function save() {
     }
 
     emit('updateItem', updatedItem.value)
-    appStore.saveLogItem(updatedItem);
+
 }
 
 const editorRef = ref<QEditor>()

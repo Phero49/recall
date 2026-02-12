@@ -46,7 +46,7 @@ func onReady() {
 	mShow := systray.AddMenuItem("Show Window", "Show the application window")
 	mHide := systray.AddMenuItem("Hide Window", "Close the window but keep running in background")
 	systray.AddSeparator()
-	//mExit := systray.AddMenuItem("Exit", "Completely close the application")
+	mExit := systray.AddMenuItem("Exit", "Completely close the application")
 
 	go func() {
 		for {
@@ -55,12 +55,13 @@ func onReady() {
 				sendCommand(ipcShowURL, "Showing app")
 			case <-mHide.ClickedCh:
 				sendCommand(ipcHideURL, "Hiding app")
-				// case <-mExit.ClickedCh:
-				// 	handleExitApp()
+			case <-mExit.ClickedCh:
+				handleExitApp()
 			}
 		}
 	}()
 }
+
 func sendCommand(url string, logMsg string) {
 	fmt.Println(logMsg + "...")
 	client := http.Client{Timeout: 1 * time.Second}

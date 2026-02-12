@@ -3,6 +3,7 @@ import { onMounted, ref, watch } from "vue";
 import { LogItemData, useAppStore } from "../store/app";
 import LogItem from "../components/logItem.vue";
 import AnalyticsPanel from "../components/AnalyticsPanel.vue";
+import { useQuasar } from "quasar";
 
 const showAnalytics = ref(false);
 const addLogItem = ref(false);
@@ -55,15 +56,53 @@ function deleteItem(i: number, id?: number) {
     appStore.deleteLogItem(id);
     items.value.splice(i, 1);
 }
-
-
+const $q = useQuasar()
+const editTitleRef = ref<HTMLSpanElement>()
 function toggleEditAt(i: number) {
     if (editItemAt.value == i) {
+        const el = document.querySelector<HTMLSpanElement>(`[title-index="${i}"]`)
+        items.value![i].title = el?.innerText || ''
         editItemAt.value = -1;
+        saveLogItem(items.value![i], i);
+
+        $q.notify({ message: 'title updated', type: 'positive', })
     } else {
         editItemAt.value = i;
     }
+
 }
+
+const vEditable = {
+    mounted(el: HTMLElement, binding: any) {
+        el.innerText = binding.value
+
+        el.addEventListener('input', () => {
+            binding.instance[binding.expression] = el.innerText
+        })
+    },
+    updated(el: HTMLElement, binding: any) {
+        if (el.innerText !== binding.value) {
+            el.innerText = binding.value
+        }
+    }
+}
+
+function saveLogItem(item: LogItemData, index: number) {
+    appStore.saveLogItem(item);
+    if (items.value == undefined) {
+        return
+    }
+    items.value[index] = item;
+}
+
+function updateTime(item: LogItemData, index: number) {
+    if (items.value == undefined) {
+        return
+    }
+    items.value[index] = item;
+    appStore.saveLogItem(item);
+}
+
 </script>
 
 <template>
@@ -102,9 +141,11 @@ function toggleEditAt(i: number) {
                     :subtitle="new Date(item.time as string).toLocaleTimeString()" class="modern-timeline-entry">
                     <template #title>
                         <div class="row items-center no-wrap">
-                            <span class="text-h6 text-weight-medium" style="outline: none"
-                                :contenteditable="editItemAt == i" :class="{ 'text-primary': editItemAt == i }">
-                                {{ item.title }}
+                            <span v-editable="item.title" class="text-h6 text-weight-medium"
+                                :ref="(el) => editTitleRef = el as HTMLElement" style="outline: none"
+                                :contenteditable="editItemAt == i" :title-index="i"
+                                :class="{ 'text-primary': editItemAt == i }">
+
                             </span>
                             <q-btn dense round color="primary" :icon="editItemAt == i ? 'check' : 'edit'" size="xs" flat
                                 class="q-ml-sm" @click="toggleEditAt(i)" />
@@ -121,7 +162,7 @@ function toggleEditAt(i: number) {
                                 }) }}
                                 <q-menu @before-show="timeModel = new Date(item.time as string).toTimeString()">
                                     <q-time
-                                        @update:model-value="(v) => { item.time = item.time?.split(' ')[0] + ` ${v}`; }"
+                                        @update:model-value="(v) => { item.time = item.time?.split(' ')[0] + ` ${v}`; updateTime(item, i); }"
                                         v-model="timeModel" mask="hh:mm:ss" format24h color="primary" />
                                 </q-menu>
                             </div>
@@ -142,7 +183,7 @@ function toggleEditAt(i: number) {
                         </div>
                     </template>
                     <div class="item-content-wrapper">
-                        <log-item :log-item-data="item" @updateItem="(v) => { items![i] = v }" />
+                        <log-item :log-item-data="item" @updateItem="(v) => { saveLogItem(v, i) }" />
                     </div>
                 </q-timeline-entry>
             </q-timeline>
