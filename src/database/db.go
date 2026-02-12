@@ -39,6 +39,22 @@ func InitDB() {
 			types TEXT NOT NULL,
 			FOREIGN KEY (log_id) REFERENCES logs(id) ON DELETE CASCADE
 		);
+
+	CREATE TABLE IF NOT EXISTS tags (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL UNIQUE,
+		color TEXT NOT NULL
+	);
+
+CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
+
+CREATE TABLE IF NOT EXISTS log_item_tags (
+    log_item_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY (log_item_id) REFERENCES log_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (log_item_id, tag_id)
+);
 	`)
 	if err != nil {
 		panic(err)
@@ -115,6 +131,7 @@ type LogItem struct {
 	Sights  string `json:"sights"`
 	Time    string `json:"time"`
 	Types   string `json:"types"`
+	Tags    *[]Tag `json:"tags"`
 }
 
 func AddLogItem(logID int, title, details, status, sights, time, types string) (*LogItem, error) {
@@ -163,6 +180,12 @@ func GetLogItemsByDate(date string) ([]LogItem, error) {
 		if err != nil {
 			return nil, err
 		}
+		// get tags for this log item
+		tags, err := GetLogTags(i.ID)
+		if err != nil {
+			return nil, err
+		}
+		i.Tags = &tags
 		items = append(items, i)
 	}
 	return items, nil
@@ -357,4 +380,83 @@ func AutoGenerateLogs() {
 	}
 
 	fmt.Println("=== AutoGenerateLogs END ===")
+}
+
+type Tag struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
+	TagID *int   `json:"tag_id"`
+}
+
+func AddTag(tag Tag) error {
+	if tag.TagID != nil {
+		return AddItemLogTag(tag.ID, *tag.TagID)
+	}
+	q := `INSERT INTO tags (name, color) VALUES (?, ?)`
+	results, err := DB.Exec(q, tag.Name, tag.Color)
+	if err != nil {
+		return err
+	}
+	id, err := results.LastInsertId()
+	if err != nil {
+		return err
+	}
+	tagID := int(id)
+
+	return AddItemLogTag(tag.ID, tagID)
+}
+
+func AddItemLogTag(itemId, tagId int) error {
+	q := `INSERT INTO log_item_tags (log_item_id, tag_id) VALUES (?, ?)`
+	_, err := DB.Exec(q, itemId, tagId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func RemoveItemTag(tagId int, itemId int) error {
+	_, err := DB.Exec("DELETE FROM log_item_tags WHERE log_item_id = ? AND tag_id = ?", itemId, tagId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetLogTags(logItemId int) ([]Tag, error) {
+	rows, err := DB.Query(`SELECT t.id, t.name, t.color FROM log_item_tags lit JOIN tags t ON lit.tag_id = t.id WHERE lit.log_item_id = ?`, logItemId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []Tag
+	for rows.Next() {
+		var t Tag
+		err := rows.Scan(&t.ID, &t.Name, &t.Color)
+		if err != nil {
+			return nil, err
+		}
+		tags = append(tags, t)
+	}
+	return tags, nil
+}
+func GetTags() ([]Tag, error) {
+	rows, err := DB.Query(`SELECT id, name, color FROM tags`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []Tag
+	for rows.Next() {
+		var t Tag
+		err := rows.Scan(&t.ID, &t.Name, &t.Color)
+		if err != nil {
+			return nil, err
+		}
+		tags = append(tags, t)
+	}
+	return tags, nil
 }

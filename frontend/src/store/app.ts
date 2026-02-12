@@ -8,6 +8,10 @@ import {
   SaveLogItem,
   DeleteLogItem,
   GetAnalytics,
+  AddItemLogTag,
+  AddTag,
+  GetTags,
+  RemoveItemTag,
 } from "../../wailsjs/go/main/App";
 type LogItem = {
   name: string;
@@ -29,6 +33,7 @@ export type LogItemData = {
   date?: string;
   id?: number;
   log_id?: number;
+  tags?: Tag[];
 };
 
 export type AnalyticsData = {
@@ -38,6 +43,13 @@ export type AnalyticsData = {
   total_ideas: number;
   insight_count: number;
   streak: number;
+};
+
+export type Tag = {
+  name: string;
+  color: string;
+  id?: number;
+  log_id?: number;
 };
 export const useAppStore = defineStore("app", () => {
   // State
@@ -57,7 +69,20 @@ export const useAppStore = defineStore("app", () => {
     }
   }
 
-  function addTask(name: string) {}
+  function attachTag(tagId: number, logId: number) {
+    AddItemLogTag(tagId, logId);
+  }
+
+  async function addTag(tag: Tag) {
+    await AddTag({ color: tag.color, name: tag.name, id: tag.log_id! });
+  }
+
+  async function removeTag(tagId?: number, logId?: number) {
+    if (tagId == null || logId == null) {
+      return;
+    }
+    await RemoveItemTag(tagId, logId);
+  }
 
   async function fetchLogs(duration: string = "all") {
     try {
@@ -75,6 +100,16 @@ export const useAppStore = defineStore("app", () => {
       }
     } catch (err) {
       console.error("Failed to fetch logs:", err);
+    }
+  }
+
+  async function getTags() {
+    try {
+      const result = await GetTags();
+      return result;
+    } catch (err) {
+      console.error("Failed to fetch tags:", err);
+      return [];
     }
   }
 
@@ -110,6 +145,11 @@ export const useAppStore = defineStore("app", () => {
         item.time || "",
         item.types,
       );
+
+      const log = logList.value?.find((v) => v.id == activeLog.value?.id);
+      if (log) {
+        log.itemCount = (log.itemCount || 0) + 1;
+      }
       return result;
     } catch (err) {
       console.error("Failed to add log item:", err);
@@ -141,6 +181,10 @@ export const useAppStore = defineStore("app", () => {
     }
     try {
       const result = await DeleteLogItem(id);
+      const log = logList.value?.find((v) => v.id == activeLog.value?.id);
+      if (log) {
+        log.itemCount = (log.itemCount || 1) - 1;
+      }
       return result;
     } catch (err) {
       console.error("Failed to delete log item:", err);
@@ -152,8 +196,11 @@ export const useAppStore = defineStore("app", () => {
     activeLog,
     logList,
     deleteLogItem,
-    addTask,
+    attachTag,
+    addTag,
+    removeTag,
     addLog,
+    getTags,
     fetchLogs,
     createLogItem,
     fetchLogItemsByDate,

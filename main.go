@@ -19,6 +19,8 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+//"github.com/gen2brain/beeep"
+
 //go:embed all:frontend/dist
 var assets embed.FS
 
@@ -93,6 +95,10 @@ func main() {
 		},
 		Bind: []interface{}{app},
 	})
+
+	if err != nil {
+		panic(err)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
