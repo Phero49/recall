@@ -39,6 +39,7 @@
         <div class="row q-gutter-x-sm items-center">
           <q-chip
             outline
+            v-if="appStore.tab == 'task'"
             size="sm"
             :color="getStatusStyles().color"
             class="status-chip"
@@ -50,8 +51,8 @@
             />
             <span class="text-weight-bold">{{ getStatusStyles().label }}</span>
           </q-chip>
-
           <q-btn-dropdown
+            v-if="appStore.tab == 'task'"
             flat
             label="Update Status"
             size="sm"
@@ -87,6 +88,7 @@
                   ><q-item-label>Failed</q-item-label></q-item-section
                 >
               </q-item>
+
               <q-item
                 clickable
                 v-close-popup
@@ -195,18 +197,27 @@
 
   <q-dialog full-height @hide="save" v-model="addInsights">
     <q-card class="bg-grey-10" style="width: 100%; max-width: 700px">
-      <q-editor
-        toolbar-bg="black"
-        toolbar-text-color="white"
-        toolbar-rounded
-        class="bg-transparent"
-        :toolbar="toolbar"
-        content-style="outline: none;"
-        ref="editorRef"
-        content-class=" text-subtitle1 text-white"
-        v-model="insights"
-        min-height="300px"
-      />
+      <form
+        autocorrect="on"
+        autocapitalize="on"
+        autocomplete="on"
+        spellcheck="true"
+      >
+        <q-editor
+          toolbar-bg="black"
+          toolbar-text-color="white"
+          toolbar-rounded
+          class="bg-transparent"
+          autocorrect="on"
+          autocapitalize="on"
+          :toolbar="toolbar"
+          content-style="outline: none;"
+          ref="editorRef"
+          content-class=" text-subtitle1 text-white"
+          v-model="insights"
+          min-height="300px"
+        />
+      </form>
     </q-card>
   </q-dialog>
 </template>

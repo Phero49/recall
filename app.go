@@ -53,3 +53,18 @@ func (a *App) DeleteLogItem(id int) error {
 func (a *App) GetAnalytics() (*database.Analytics, error) {
 	return database.GetAnalytics()
 }
+
+func (a *App) AddTag(tag database.Tag) error {
+	return database.AddTag(tag)
+}
+
+func (a *App) AddItemLogTag(itemId, tagId int) error {
+	return database.AddItemLogTag(itemId, tagId)
+}
+func (a *App) GetTags() ([]database.Tag, error) {
+	return database.GetTags()
+}
+
+func (a *App) RemoveItemTag(itemId, tagId int) error {
+	return database.RemoveItemTag(itemId, tagId)
+}

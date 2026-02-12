@@ -100,6 +100,10 @@ function updateTime(item: LogItemData, index: number) {
   items.value[index] = item;
   appStore.saveLogItem(item);
 }
+
+function filterItems(items: LogItemData[]) {
+  return items.filter((item) => item.types == tab.value);
+}
 </script>
 
 <template>
@@ -147,108 +151,113 @@ function updateTime(item: LogItemData, index: number) {
     </div>
 
     <div v-if="items != undefined" class="timeline-wrapper">
-      <q-timeline color="primary" layout="dense">
-        <q-timeline-entry
-          v-for="(item, i) in items"
-          :key="i"
-          :subtitle="new Date(item.time as string).toLocaleTimeString()"
-          class="modern-timeline-entry"
-        >
-          <template #title>
-            <div class="row items-center no-wrap">
-              <span
-                v-editable="item.title"
-                class="text-h6 text-weight-medium"
-                :ref="(el) => (editTitleRef = el as HTMLElement)"
-                style="outline: none"
-                :contenteditable="editItemAt == i"
-                :title-index="i"
-                :class="{ 'text-primary': editItemAt == i }"
-              >
-              </span>
-              <q-btn
-                dense
-                round
-                color="primary"
-                :icon="editItemAt == i ? 'check' : 'edit'"
-                size="xs"
-                flat
-                class="q-ml-sm"
-                @click="toggleEditAt(i)"
-              />
-            </div>
-          </template>
-
-          <template #subtitle>
-            <div class="row justify-between items-center q-mb-sm">
-              <div
-                class="text-caption text-grey-5 row items-center cursor-pointer time-badge"
-              >
-                <q-icon name="schedule" size="xs" class="q-mr-xs" />
-                {{
-                  new Date(item.time as string).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                }}
-                <q-menu
-                  @before-show="
-                    timeModel = new Date(item.time as string).toTimeString()
-                  "
+      <div v-if="filterItems(items).length > 0">
+        <q-timeline color="primary" layout="dense">
+          <q-timeline-entry
+            v-for="(item, i) in filterItems(items)"
+            :key="i"
+            :subtitle="new Date(item.time as string).toLocaleTimeString()"
+            class="modern-timeline-entry"
+          >
+            <template #title>
+              <div class="row items-center no-wrap">
+                <span
+                  v-editable="item.title"
+                  class="text-h6 text-weight-medium"
+                  :ref="(el) => (editTitleRef = el as HTMLElement)"
+                  style="outline: none"
+                  :contenteditable="editItemAt == i"
+                  :title-index="i"
+                  :class="{ 'text-primary': editItemAt == i }"
                 >
-                  <q-time
-                    @update:model-value="
-                      (v) => {
-                        item.time = item.time?.split(' ')[0] + ` ${v}`;
-                        updateTime(item, i);
-                      }
-                    "
-                    v-model="timeModel"
-                    mask="hh:mm:ss"
-                    format24h
-                    color="primary"
-                  />
-                </q-menu>
-              </div>
-              <div>
+                </span>
                 <q-btn
-                  size="sm"
-                  flat
                   dense
                   round
-                  color="grey-6"
-                  icon="more_vert"
-                >
-                  <q-menu auto-close class="smart-border">
-                    <q-list style="min-width: 120px">
-                      <q-item
-                        clickable
-                        @click="deleteItem(i, item.id)"
-                        class="text-negative"
-                      >
-                        <q-item-section avatar>
-                          <q-icon name="delete" size="xs" />
-                        </q-item-section>
-                        <q-item-section>Delete</q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                  color="primary"
+                  :icon="editItemAt == i ? 'check' : 'edit'"
+                  size="xs"
+                  flat
+                  class="q-ml-sm"
+                  @click="toggleEditAt(i)"
+                />
               </div>
+            </template>
+
+            <template #subtitle>
+              <div class="row justify-between items-center q-mb-sm">
+                <div
+                  class="text-caption text-grey-5 row items-center cursor-pointer time-badge"
+                >
+                  <q-icon name="schedule" size="xs" class="q-mr-xs" />
+                  {{
+                    new Date(item.time as string).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  }}
+                  <q-menu
+                    @before-show="
+                      timeModel = new Date(item.time as string).toTimeString()
+                    "
+                  >
+                    <q-time
+                      @update:model-value="
+                        (v) => {
+                          item.time = item.time?.split(' ')[0] + ` ${v}`;
+                          updateTime(item, i);
+                        }
+                      "
+                      v-model="timeModel"
+                      mask="hh:mm:ss"
+                      format24h
+                      color="primary"
+                    />
+                  </q-menu>
+                </div>
+                <div>
+                  <q-btn
+                    size="sm"
+                    flat
+                    dense
+                    round
+                    color="grey-6"
+                    icon="more_vert"
+                  >
+                    <q-menu auto-close class="smart-border">
+                      <q-list style="min-width: 120px">
+                        <q-item
+                          clickable
+                          @click="deleteItem(i, item.id)"
+                          class="text-negative"
+                        >
+                          <q-item-section avatar>
+                            <q-icon name="delete" size="xs" />
+                          </q-item-section>
+                          <q-item-section>Delete</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
+                </div>
+              </div>
+            </template>
+            <div class="item-content-wrapper">
+              <log-item
+                :log-item-data="item"
+                @updateItem="
+                  (v) => {
+                    saveLogItem(v, i);
+                  }
+                "
+              />
             </div>
-          </template>
-          <div class="item-content-wrapper">
-            <log-item
-              :log-item-data="item"
-              @updateItem="
-                (v) => {
-                  saveLogItem(v, i);
-                }
-              "
-            />
-          </div>
-        </q-timeline-entry>
-      </q-timeline>
+          </q-timeline-entry>
+        </q-timeline>
+      </div>
+      <div v-else class="text-center text-grey-6 q-pa-sm">
+        No {{ tab }} found
+      </div>
     </div>
 
     <q-page-sticky position="bottom-right" :offset="[24, 24]">
