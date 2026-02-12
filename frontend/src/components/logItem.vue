@@ -39,7 +39,7 @@
         <div class="row q-gutter-x-sm items-center">
           <q-chip
             outline
-            v-if="appStore.tab == 'task'"
+            v-if="logItemData.types.toLowerCase() == 'tasks'"
             size="sm"
             :color="getStatusStyles().color"
             class="status-chip"
@@ -52,7 +52,7 @@
             <span class="text-weight-bold">{{ getStatusStyles().label }}</span>
           </q-chip>
           <q-btn-dropdown
-            v-if="appStore.tab == 'task'"
+            v-if="logItemData.types.toLowerCase() == 'tasks'"
             flat
             label="Update Status"
             size="sm"

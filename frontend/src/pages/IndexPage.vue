@@ -265,7 +265,7 @@ function filterItems(items: LogItemData[]) {
         color="primary"
         icon="add"
         fab
-        label="New Entry"
+        :label="`New ${tab}`"
         rounded
         no-caps
         padding="sm lg"
