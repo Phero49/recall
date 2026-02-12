@@ -1,0 +1,202 @@
+/* Normalize heading spacing inside Quasar editor */
+.q-editor__content h1,
+.q-editor__content h2,
+.q-editor__content h3,
+.q-editor__content h4,
+.q-editor__content h5,
+.q-editor__content h6 {
+  margin: 0.4em 0 0.2em;   /* kill browser defaults */
+  padding: 0;              /* remove hidden padding */
+  line-height: 1.25;
+}
+
+/* Markdown-like scale */
+.q-editor__content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--q-primary);
+}
+
+.q-editor__content h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.q-editor__content h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* Modern UI Enhancements */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+}
+
+.smart-border {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.modern-shadow {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tabs-container {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modern-timeline-entry {
+  padding-bottom: 32px;
+}
+
+.time-badge {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.time-badge:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.editing-mode {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px dashed var(--q-primary) !important;
+}
+
+.status-chip {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  height: 26px; /* Explicit height for better consistency */
+}
+
+.status-chip .q-chip__content {
+  display: flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+}
+
+/* Transitions */
+.q-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.q-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Main Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Layout Elements */
+.bg-dark-page {
+  background-color: #020617 !important;
+}
+
+.sidebar-glass {
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.tabs-modern {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.tabs-modern .q-tab {
+  border-radius: 8px;
+  margin: 0 2px;
+  min-height: 40px;
+}
+
+.tabs-modern .q-tab--active {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.search-input {
+  width: 240px;
+  transition: width 0.3s ease;
+}
+
+.search-input.q-field--focused {
+  width: 320px;
+}
+
+.search-input .q-field__control {
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.q-drawer {
+  background: #0F172A !important;
+}
+
+.q-item {
+  border-radius: 8px;
+  margin: 2px 8px;
+  transition: all 0.2s ease;
+}
+
+.q-item--active {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #10B981 !important;
+}
+
+.q-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
