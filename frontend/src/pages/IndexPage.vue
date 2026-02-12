@@ -104,6 +104,8 @@ function updateTime(item: LogItemData, index: number) {
 function filterItems(items: LogItemData[]) {
   return items.filter((item) => item.types == tab.value);
 }
+const filterText = ref("");
+function filterFn(input: string) {}
 </script>
 
 <template>
@@ -116,10 +118,35 @@ function filterItems(items: LogItemData[]) {
           </h1>
           <div class="text-subtitle1 text-grey-5 row items-center q-mt-xs">
             <q-icon name="calendar_today" size="xs" class="q-mr-xs" />
-            {{ appStore.activeLog.scheduledDate }}
+            {{
+              new Date(appStore.activeLog.createdAt!).toLocaleDateString(
+                "en-US",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                },
+              )
+            }}
           </div>
         </div>
+
         <div class="row q-gutter-sm">
+          <div class="q-mr-md">
+            <q-input
+              :input-style="{ borderRadius: '10px' }"
+              dense
+              v-model="filterText"
+              outlined
+              type="text"
+              label="filter"
+            >
+              <template #append>
+                <q-icon name="filter_list" />
+              </template>
+            </q-input>
+          </div>
           <q-btn
             outline
             color="primary"
@@ -128,7 +155,6 @@ function filterItems(items: LogItemData[]) {
             rounded
             @click="showAnalytics = true"
           />
-          <q-btn flat round color="grey-5" icon="settings" />
         </div>
       </div>
     </div>

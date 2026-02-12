@@ -2,8 +2,8 @@
   <div class="q-mb-md">
     <q-card flat class="glass-card smart-border modern-shadow">
       <q-card-section class="q-pb-none">
-        <div class="row justify-between items-start no-wrap">
-          <div class="col-grow">
+        <div class="row items-start no-wrap">
+          <div class="col-11">
             <q-editor
               content-class="text-subtitle1"
               style="border-radius: 10px"
@@ -21,17 +21,18 @@
                             {{ logItemData?.details }}
                         </div> -->
           </div>
-
-          <q-btn
-            dense
-            round
-            color="primary"
-            :icon="editDetails ? 'check' : 'edit_note'"
-            size="sm"
-            flat
-            class="q-ml-sm"
-            @click="toggleEdit"
-          />
+          <div class="col-1">
+            <q-btn
+              dense
+              round
+              color="primary"
+              :icon="editDetails ? 'check' : 'edit_note'"
+              size="sm"
+              flat
+              class="q-ml-sm"
+              @click="toggleEdit"
+            />
+          </div>
         </div>
       </q-card-section>
 
@@ -39,7 +40,7 @@
         <div class="row q-gutter-x-sm items-center">
           <q-chip
             outline
-            v-if="logItemData.types.toLowerCase() == 'tasks'"
+            v-if="logItemData?.types?.toLowerCase() == 'tasks'"
             size="sm"
             :color="getStatusStyles().color"
             class="status-chip"
@@ -52,7 +53,7 @@
             <span class="text-weight-bold">{{ getStatusStyles().label }}</span>
           </q-chip>
           <q-btn-dropdown
-            v-if="logItemData.types.toLowerCase() == 'tasks'"
+            v-if="logItemData?.types?.toLowerCase() == 'tasks'"
             flat
             label="Update Status"
             size="sm"
@@ -125,7 +126,7 @@
             icon="tag"
             label="Add Tags"
           >
-            <q-menu @before-show="loadTags" style="min-width: 250px">
+            <q-menu style="min-width: 250px" @show="loadTags">
               <div class="q-pa-sm">
                 <q-input
                   :style="{ backgroundColor: color }"
@@ -157,10 +158,10 @@
                   </template>
                 </q-input>
                 <q-separator spaced class="q-my-md" />
-                <q-list v-if="tags.length > 0">
+                <q-list v-if="tags && tags.length > 0">
                   <q-item
-                    v-for="tag in tags"
-                    :key="tag.name"
+                    v-for="(tag, index) in tags"
+                    :key="index"
                     clickable
                     v-close-popup
                     @click="addTag(tag)"
@@ -244,11 +245,13 @@ const template = `<div class="insight-prompt"  font-size: 0.95em; line-height: 1
 const insights = ref(props.logItemData?.sights || template);
 const detailsRef = ref<HTMLElement | null>(null);
 const newTag = ref("");
-const tags = ref<{ color: string; name: string }[]>([]);
+const tags = ref<Tag[]>([]);
 const color = ref("#ff00d4");
+
 function saveTags() {
   if (!newTag.value) return;
-  tags.value.push({ color: color.value, name: newTag.value });
+  const tagToAdd: Tag = { color: color.value, name: newTag.value };
+  tags.value.push(tagToAdd);
   appStore.addTag({
     color: color.value,
     name: newTag.value,
@@ -258,20 +261,28 @@ function saveTags() {
   if (props.logItemData?.tags == null) {
     props.logItemData.tags = [];
   }
-  props.logItemData.tags.push({ color: color.value, name: newTag.value });
+  props.logItemData.tags.push(tagToAdd);
   emit("updateItem", props.logItemData);
 
   newTag.value = "";
 }
+
 const allTags = ref<Tag[]>([]);
 async function loadTags() {
-  allTags.value = await appStore.getTags();
-  tags.value = allTags.value;
+  try {
+    const res = await appStore.getTags();
+    allTags.value = res || [];
+    tags.value = [...allTags.value];
+  } catch (error) {
+    console.error("Error loading tags:", error);
+  }
 }
 
-function filterTags(input: string) {
+function filterTags(input: string | null) {
+  if (!allTags.value) return;
+  const search = (input || "").toLowerCase();
   tags.value = allTags.value.filter((tag) =>
-    tag.name.toLowerCase().includes(input.toLowerCase()),
+    tag.name.toLowerCase().includes(search),
   );
 }
 

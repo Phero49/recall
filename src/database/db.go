@@ -445,6 +445,7 @@ func GetLogTags(logItemId int) ([]Tag, error) {
 func GetTags() ([]Tag, error) {
 	rows, err := DB.Query(`SELECT id, name, color FROM tags`)
 	if err != nil {
+		fmt.Println("Error getting tags:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -454,6 +455,7 @@ func GetTags() ([]Tag, error) {
 		var t Tag
 		err := rows.Scan(&t.ID, &t.Name, &t.Color)
 		if err != nil {
+			fmt.Println("Error scanning tag:", err)
 			return nil, err
 		}
 		tags = append(tags, t)
