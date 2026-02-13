@@ -35,7 +35,7 @@ func main() {
 
 	if *asService {
 		startHidden = true
-		return
+
 	}
 
 	// Read icon
