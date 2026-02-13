@@ -32,8 +32,9 @@ func main() {
 	asService := flag.Bool("service", false, "start app as a service")
 	flag.Parse()
 	startHidden := *asService
+
 	if *asService {
-		services.RegisterService() // only for prod builds
+		startHidden = true
 		return
 	}
 
@@ -56,6 +57,12 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
+			build := runtime.Environment(ctx).BuildType
+
+			if build == "production" {
+				services.RegisterService() // only for prod builds
+
+			}
 			// Start internal IPC server
 			go func() {
 				mux := http.NewServeMux()
